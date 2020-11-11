@@ -6,13 +6,14 @@ const Post = require('./models/post');
 
 const app = express();
 
-mongoose.connect("mongodb+srv://john:Fl224Ci3VvYfFrBr@cluster0.fr4p4.mongodb.net/test?retryWrites=true&w=majority",
+mongoose.connect("mongodb+srv://john:Fl224Ci3VvYfFrBr@cluster0.fr4p4.mongodb.net/mean-db?retryWrites=true&w=majority",
   {useNewUrlParser: true, useUnifiedTopology: true})
   .then(() => {
-    console.log("Connected to Database")
+    console.log("Connection to Database established...")
   })
-  .catch(() => {
-    console.log("Connection failed!")
+  .catch((err) => {
+    console.log("Connection to Database failed!")
+    console.log(err);
   });
 
 app.use(bodyParser.json());
@@ -30,30 +31,19 @@ app.post("/api/posts", (req, res, next) => {
       title: req.body.title,
       content: req.body.content
     });
-    console.log(post);
+    post.save();
     res.status(201).json({
         message : 'Post added succesfully.'
     });
 });
 
-app.use("/api/posts", (req, res, next) => {
-    const posts = [
-        {
-            id : 'f8nvv73n4v9',
-            title: 'First server-side post',
-            content: 'This is coming from the server'
-        },
-        {
-            id : 'fheufh394zt39h',
-            title: 'Second server-side post',
-            content: 'This is coming from the server!'
-        }
-    ];
-    res.status(200).json({
-        message: 'Posts fetched succesfully!',
-        posts : posts
+app.use("/api/posts", (req, res) => {
+    Post.find().then(documents => {
+        res.status(200).json({
+          message: 'Posts fetched succesfully!',
+          posts : documents
+        });
     });
-    next();
 });
 
 module.exports = app;
